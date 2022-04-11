@@ -1,0 +1,218 @@
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+CODING EVALUATION ANSWERS
+(JATIN DEVNANI)
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 2 - What is the 3NF? Explain with an example. You don’t need to draw the
+tables or write the queries. Just mention the schema before and after the
+third normal form.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Answer 2 -
+
+3NF stands for Third normal form. It is the third level of the normalisation process of the database. It aims to remove the transitive functional dependency of non prime attributes on super key.
+
+To be in 3NF the table must complete these two conditions -
+a) The table must be in 2NF
+b) Transitive functional dependency of non prime attributes on super key should be removed.
+
+For e.g
+Consider this schema for a game called Counter Strike Global offensive.
+
+gamerID ---- gamerUserName --- GamerPassword --- GamerPasswordStrength
+
+Prime Attributes -> gamerID
+Non-Prime Attributes -> gamerUserName, GamerPassword and GamerPasswordStrength
+
+Here gamerID is the Primary key and is unique for every player.
+
+Now, to be in 3NF all the non prime attributes should only be dependent upon the gamerID (PK) and there should be no transitive functional dependency.
+
+Here, all the non prime attributes are dependent upon gamerID but GamerPasswordStrength is dependent upon gamerPassword. This is transitive dependency.
+This breaks the rule of 3NF
+
+So to fix this issue we'll divide the table into two tables for the schema to be in 3NF
+
+----NEW SCHEMA----
+
+Table 1 ----> gamerID----gamerUserName----GamerPassword 
+
+Table 2 ----> gamerPassword ---- gamerPasswordStrength 
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 3 - Briefly explain what a transaction is along with the ACID properties.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Answer 3 -
+
+A Transaction is nothing but a sequence of operations on a database as an atomic unit of work.
+
+For e.g. We can use transactions where more than one queries are to be fired to keep the data consistent.
+	e.g. Transaction of money from one account to another
+		-> Subtract from one account
+		-> Add to another account
+	This requires more than one queries. If we use a transaction these two queries will be executed together.
+
+
+--> ACID Properties of a transaction
+
+a) Atomic --> A transaction should represent a single logical unit of work. 
+b) Consistent --> After the transaction has taken place, the data must be in a consistent state.
+c) Isolated --> Changes made by the transaction must be independent of another transaction to avoid any exceptions.
+d) Durable --> The changes made to the database by a transaction must be permanent.
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 4 - Write an SQL query to report the first name, last name, city, and state of
+each person in the Person table. If the address of a personId is not
+present in the Address table, report null instead.
+Return the result table in any order.
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Solution 4 - 
+
+SELECT firstname, lastname, city, state FROM person left join address ON person.personid = address.personid;
+
+---> QUERIES FIRED (ALL)
+
+
+create table Person(personid int not null primary key, lastname varchar(15), firstname varchar(15));
+
+mysql> create table address(addressID int primary key not null, personId int, city varchar(15), state varchar(25));
+
++----------+----------+-----------+
+| personid | lastname | firstname |
++----------+----------+-----------+
+|        1 | Dev      | Jatin     |
+|        2 | Vas      | Suman     |
+|        3 | jain     | Chirag    |
++----------+----------+-----------+
+
++-----------+----------+---------+--------------+
+| addressID | personId | city    | state        |
++-----------+----------+---------+--------------+
+|        10 |        3 | Udaipur | Chattisgargh |
+|        33 |        1 | Bhopal  | MP           |
++-----------+----------+---------+--------------+
+
+mysql> select firstname, lastname, city, state from person left join address ON person.personid = address.personid;
++-----------+----------+---------+--------------+
+| firstname | lastname | city    | state        |
++-----------+----------+---------+--------------+
+| Jatin     | Dev      | Bhopal  | MP           |
+| Suman     | Vas      | NULL    | NULL         |
+| Chirag    | jain     | Udaipur | Chattisgargh |
++-----------+----------+---------+--------------+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Question 1 -You are given three tables: Students, Friends and Packages. Students
+contains two columns: ID and Name. Friends contains two columns: ID
+and Friend_ID (ID of the ONLY best friend). Packages contains two
+columns: ID and Salary (offered salary in $ thousands per month)
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Answer 1 -
+
+SELECT name from students s INNER JOIN friends f ON s.id = f.id INNER JOIN packages p on s.id = p.id WHERE (SELECT salary from packages WHERE id=f.id) < (SELECT salary from PACKAGES where id = f.friend_id) ORDER BY p.salary;
+
+	|
+	|
+	|
+
+ALL QUERIES FIRED
+mysql> create table Students(id int, name varchar(25));
+
+mysql> create table friends(id int, FRIEND_ID int);
+
+mysql> create table packages(id int, Salary float);
+
+mysql> select * from students;
++------+----------+
+| id   | name     |
++------+----------+
+|    1 | Ashley   |
+|    2 | Samantha |
+|    3 | Julia    |
+|    4 | Scarlet  |
++------+----------+
+4 rows in set (0.01 sec)
+
+mysql> select * from packages;
++------+--------+
+| id   | Salary |
++------+--------+
+|    1 |   15.2 |
+|    2 |  10.06 |
+|    3 |  11.55 |
+|    4 |  12.12 |
++------+--------+
+4 rows in set (0.00 sec)
+
+mysql> select * from friends;
++------+-----------+
+| id   | FRIEND_ID |
++------+-----------+
+|    1 |         2 |
+|    2 |         3 |
+|    3 |         4 |
+|    4 |         1 |
++------+-----------+
+4 rows in set (0.02 sec)
+
+mysql> select * from students s inner join friends f ON s.id = f.id inner join packages p on s.id = p.id WHERE (select salary from packages where id=f.id) < (select salary from packages where id = f.friend_id) ORDER BY p.salary;
++------+----------+------+-----------+------+--------+
+| id   | name     | id   | FRIEND_ID | id   | Salary |
++------+----------+------+-----------+------+--------+
+|    2 | Samantha |    2 |         3 |    2 |  10.06 |
+|    3 | Julia    |    3 |         4 |    3 |  11.55 |
+|    4 | Scarlet  |    4 |         1 |    4 |  12.12 |
++------+----------+------+-----------+------+--------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT name from students s INNER JOIN friends f ON s.id = f.id INNER JOIN packages p on s.id = p.id WHERE (SELECT salary from packages WHERE id=f.id) < (SELECT salary from PACKAGES where id = f.friend_id) ORDER BY p.salary;
++----------+
+| name     |
++----------+
+| Samantha |
+| Julia    |
+| Scarlet  |
++----------+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sequ
+
+
+
+
